@@ -1,26 +1,7 @@
   #include <stdio.h>
   #include <string.h>
   #include <stdlib.h>
-
-struct node
-  {
-      int qty,price;
-      char bookname[100];
-      struct node *next;
-  };
-  typedef struct node NODE;
-  typedef NODE* NodePtr;
-
-void menu(void);
-int sell(NodePtr *STOCK , char Bookname[],int price, int qty);
-int buy(NodePtr *STOCK , char bookname[],int Qty);
-void printStock(NodePtr *STOCK);
-int checkstock(NodePtr *STOCK , char Bookname[] );
-int checkquan(NodePtr *STOCK , int qty,char bookname[]);
-void SwapPrice(NodePtr *STOCK);
-void SwapQty(NodePtr *STOCK);
-void SwapName(NodePtr *STOCK);
-
+  //#include "Swap.h"
 
   void menu(void)
   {
@@ -35,6 +16,16 @@ void SwapName(NodePtr *STOCK);
     printf("|    [ 5 ] EXIT                     |");
     printf("\n-------------------------------------\n");
   }
+  
+  struct node
+  {
+      int qty,price;
+      char bookname[100];
+      struct node *next;
+  };
+  typedef struct node NODE;
+  typedef NODE* NodePtr;
+  
   
   //sell รับหนังสือเข้ามา สร้างลิสต์เก็บหนังสือ
   int sell(NodePtr *STOCK, char Bookname[],int price, int qty ){ 
@@ -54,23 +45,30 @@ void SwapName(NodePtr *STOCK);
           previous = current; 
           current = current->next;
       }
+    /*if (strcmp(current->bookname,Bookname) == 0){
+          printf("The name is unviable!!!\n");
+      return 0;
+    }*/
     if ( previous == NULL ) { 
       newstock->next = *STOCK;
       *STOCK = newstock;
-    } //ตัวแรก
+    } 
     else if (current == NULL) {
       previous->next = newstock;
-    }//ตัวสุดท้าย
+    }
     else { 
       previous->next = newstock;
       newstock->next = current;
-    } //ระหว่างกลาง
+    } 
     return 1;
   }
+  
+  
   
   //buy เอาหนังสือออก ลบหนังสือที่จะเอาออก
   int buy(NodePtr *STOCK, char bookname[],int Qty)  
   {
+    
     int price;
     NODE *previousPtr,*currentPtr,*tempPtr,*previousPtr1,*currentPtr1;
     previousPtr1 = NULL;
@@ -84,7 +82,9 @@ void SwapName(NodePtr *STOCK);
     {
       currentPtr1->qty -= Qty;
       price = ((currentPtr1->price)*140/100)*Qty;
+      //printf("%d\n",currentPtr1->qty);
     }
+    
     if(currentPtr1->qty==0)
     {
       if ( strcmp((*STOCK)->bookname,bookname)==0 ) //กรณีตัวแรก
@@ -112,10 +112,9 @@ void SwapName(NodePtr *STOCK);
       if(currentPtr!=NULL)
       {
         tempPtr = currentPtr; //ให้ค่านั้นเป็นTemp
-        currentPtr = currentPtr->next;
-        if(currentPtr != NULL) 
+        if(currentPtr->next != NULL) //เช็คกรณีกลับตัวแรกNULL
         {
-          previousPtr->next = currentPtr;
+          previousPtr->next = currentPtr->next;
         }
         else
         {
@@ -124,19 +123,22 @@ void SwapName(NodePtr *STOCK);
         free(tempPtr);
       }
     }
+    
   return price;
 }
+
     
 void printStock(NodePtr *STOCK)
 {
   NodePtr start;
   start = *STOCK;
+  puts( "The Stock:" );
   while ( start != NULL )
   { 
-    printf("%-20s%5d bath",start->bookname,(start->price)*140/100);
-    printf( " [%2d] \n", start->qty );
+    printf("%-20s%4d bath  ",start->bookname,(start->price)*140/100);
+    printf( " [%d] \n", start->qty );
     start = start->next;   
-  }
+  } 
 }
 
 int checkstock(NodePtr *STOCK, char Bookname[]){
@@ -169,6 +171,17 @@ int checkquan(NodePtr *STOCK, int qty,char bookname[]){
   else return 1;
 }
 
+void swap(NodePtr x,NodePtr y)
+{
+  NodePtr t=x;
+  x->price=y->price;
+  y->price=t->price;
+  x->qty=y->qty;
+  y->qty=t->qty;
+  strcpy(x->bookname,y->bookname);
+  strcpy(y->bookname,t->bookname);
+}
+
 void SwapPrice(NodePtr *STOCK)
 {
   int sorted;
@@ -181,35 +194,67 @@ void SwapPrice(NodePtr *STOCK)
   setpre=*STOCK;
   setcur=setpre->next;
   sorted=0;
-   for( ;setpre!=NULL;setpre=setpre->next)
+   for( ;setcur!=NULL;setpre=setpre->next)
    {
-      if(setcur != NULL)
-      {
-        if(setpre->price < setcur->price)
-        {
-        NodePtr t=(NodePtr) malloc(sizeof(NODE));
-        t->price=setpre->price;
-        t->qty=setpre->qty;
-        strcpy(t->bookname,setpre->bookname);
+     if(setpre->price > setcur->price)
+     {
+       printf("Hello\n");
+      swap(setpre, setcur);
+      sorted=1;
+     }
+     setcur=setcur->next;
+     if (setcur==NULL)
        
-        setpre->price=setcur->price;
-        setcur->price=t->price;
-       
-        setpre->qty=setcur->qty;
-        setcur->qty=t->qty;
-        
-        strcpy(setpre->bookname,setcur->bookname);
-        strcpy(setcur->bookname,t->bookname);
-          
-        sorted=1;
-      }
-    }
-     if (setcur!=NULL) setcur=setcur->next;
+      if(setpre->price > setcur->price)
+     {
+       printf("Hello\n");
+      swap(setpre, setcur);
+      sorted=1;
+     }
    }
    if(sorted==0) 
     break;
   }
 }
+
+void SwapName(NodePtr *STOCK)
+{
+  int sorted;
+  NodePtr setpre,setcur,setstock;
+  setstock=*STOCK;
+  setpre=*STOCK;
+  setcur=setpre->next;
+  for(;setstock!=NULL;setstock=setstock->next)
+  {
+    setpre=*STOCK;
+    setcur=setpre->next;
+    sorted=0;
+    for( ;setpre!=NULL;setpre=setpre->next)
+    {
+      if(setcur != NULL)
+      {
+        if(strcmp(setpre->bookname,setcur->bookname) > 0)
+        {
+          NodePtr t=(NodePtr) malloc(sizeof(NODE));
+          t->price=setpre->price;
+          t->qty=setpre->qty;
+          strcpy(t->bookname,setpre->bookname);
+          setpre->price=setcur->price;
+          setcur->price=t->price;
+          setpre->qty=setcur->qty;
+          setcur->qty=t->qty;
+          strcpy(setpre->bookname,setcur->bookname);
+          strcpy(setcur->bookname,t->bookname);
+          sorted=1;
+         }
+       }
+       if (setcur!=NULL) setcur=setcur->next;
+    }
+  if(sorted==0) 
+    break;
+  }
+}
+
 void SwapQty(NodePtr *STOCK)
 {
   int sorted;
@@ -232,57 +277,13 @@ void SwapQty(NodePtr *STOCK)
         t->price=setpre->price;
         t->qty=setpre->qty;
         strcpy(t->bookname,setpre->bookname);
-       
         setpre->price=setcur->price;
         setcur->price=t->price;
-       
         setpre->qty=setcur->qty;
         setcur->qty=t->qty;
-        
         strcpy(setpre->bookname,setcur->bookname);
         strcpy(setcur->bookname,t->bookname);
-        sorted=1;
-      }
-    }
-     if (setcur!=NULL) setcur=setcur->next;
-   }
-   if(sorted==0) 
-    break;
-  }
-}
-
-void SwapName(NodePtr *STOCK)
-{
-  int sorted;
-  NodePtr setpre,setcur,setstock;
-  setstock=*STOCK;
-  setpre=*STOCK;
-  setcur=setpre->next;
-  for(;setstock!=NULL;setstock=setstock->next)
-  {
-  setpre=*STOCK;
-  setcur=setpre->next;
-  sorted=0;
-   for( ;setpre!=NULL;setpre=setpre->next)
-   {
-      if(setcur != NULL)
-      {
-        if(strcmp(setpre->bookname,setcur->bookname) > 0)
-        {
-        NodePtr t=(NodePtr) malloc(sizeof(NODE));
-        t->price=setpre->price;
-        t->qty=setpre->qty;
-        strcpy(t->bookname,setpre->bookname);
-       
-        setpre->price=setcur->price;
-        setcur->price=t->price;
-       
-        setpre->qty=setcur->qty;
-        setcur->qty=t->qty;
-        
-        strcpy(setpre->bookname,setcur->bookname);
-        strcpy(setcur->bookname,t->bookname);
-
+        //swap(setpre, setcur);
         sorted=1;
       }
     }
