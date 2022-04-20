@@ -189,28 +189,32 @@ void SwapPrice(NodePtr *STOCK)
   setstock=*STOCK;
   setpre=*STOCK;
   setcur=setpre->next;
-  for(;setstock!=NULL;setstock=setstock->next)
+  for( ; setstock!=NULL; setstock=setstock->next)
   {
   setpre=*STOCK;
   setcur=setpre->next;
   sorted=0;
-   for( ;setcur!=NULL;setpre=setpre->next)
+   for( ;setpre!=NULL;setpre=setpre->next)
    {
-     if(setpre->price > setcur->price)
-     {
-       printf("Hello\n");
-      swap(setpre, setcur);
-      sorted=1;
+      if(setcur != NULL)
+      {
+        if(setpre->price < setcur->price)
+        {
+        NodePtr t=(NodePtr) malloc(sizeof(NODE));
+        t->price=setpre->price;
+        t->qty=setpre->qty;
+        strcpy(t->bookname,setpre->bookname);
+        setpre->price=setcur->price;
+        setcur->price=t->price;
+        setpre->qty=setcur->qty;
+        setcur->qty=t->qty;
+        strcpy(setpre->bookname,setcur->bookname);
+        strcpy(setcur->bookname,t->bookname);
+        //swap(setpre, setcur);
+        sorted=1;
+       }
      }
-     setcur=setcur->next;
-     if (setcur==NULL)
-       
-      if(setpre->price > setcur->price)
-     {
-       printf("Hello\n");
-      swap(setpre, setcur);
-      sorted=1;
-     }
+     if (setcur!=NULL) setcur=setcur->next;
    }
    if(sorted==0) 
     break;
